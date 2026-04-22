@@ -21,21 +21,7 @@
           :key="anime.id"
           cols="12" sm="6" md="4" lg="3"
       >
-        <v-card class="h-100">
-          <v-img :src="anime.images.webp.large_image_url" :alt="anime.title" height="400" cover />
-          <v-card-title>{{ anime.title }}</v-card-title>
-          <v-card-text>
-            <v-chip
-                size="small"
-                class="mr-2"
-            >
-              {{ anime.episodes }} episodes
-            </v-chip>
-            <v-chip size="small" variant="outlined">
-              score : {{ anime.score }}
-            </v-chip>
-          </v-card-text>
-        </v-card>
+        <anime-card :anime="anime" />
       </v-col>
     </v-row>
   </v-container>
@@ -43,6 +29,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import AnimeCard from "@/components/AnimeCard.vue";
 
 // État réactif
 const animes = ref([])

@@ -241,7 +241,7 @@ Les skeleton loaders disparaissent trop vite en local car l'API répond en quelq
 - Composants Vuetify : [vuetifyjs.com/components/all](https://vuetifyjs.com/en/components/all/)
 - SFC (Single File Component) : [devjs.ch/vue/anatomie](https://devjs.ch/vue/anatomie.html)
 
-### Ce que les élèves codent dans [`about.vue`](src/pages/about.vue)
+### Ce que les élèves codent dans [`about.vue`](src/pages/a-propos.vue)
 
 Page 100% statique — le `<script setup>` reste vide, on ne travaille que dans le `<template>`.
 
