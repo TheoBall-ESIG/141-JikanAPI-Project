@@ -66,7 +66,8 @@ export const useAnimeStore = defineStore('anime', {
                 throw new Error(`Erreur HTTP : ${response.status}`)
             }
 
-            this.animes = await response.json()
+            const json = await response.json()
+            this.animes = json.data
             console.log('Anime chargés :', this.animes.length)
         },
 

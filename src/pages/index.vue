@@ -3,7 +3,7 @@
     <h1 class="text-h4 my-4">Liste anime</h1>
 
     <!-- Chargement (skeleton) -->
-    <v-row v-if="loading">
+    <v-row v-if="isLoading">
       <v-col v-for="n in 8" :key="n" cols="12" sm="6" md="4" lg="3">
         <v-skeleton-loader type="image, heading, text" />
       </v-col>
@@ -18,7 +18,7 @@
     <v-row v-else>
       <v-col
           v-for="anime in animes"
-          :key="anime.id"
+          :key="anime.mal_id"
           cols="12" sm="6" md="4" lg="3"
       >
         <anime-card :anime="anime" />
@@ -32,13 +32,12 @@ import { ref, onMounted } from 'vue'
 import AnimeCard from "@/components/AnimeCard.vue";
 
 // État réactif
-const animes = ref([])
-const loading = ref(true)
-const error = ref(null)
+//const animes = ref([])
 
 // TODO : Charger les personnages depuis l'API Rick and Morty
 // URL : https://rickandmortyapi.com/api/character
 // La réponse contient { info: {...}, results: [...] }
+/**
 onMounted(async () => {
   try {
     const response = await fetch('https://api.jikan.moe/v4/anime?q=bleach&sfw')
@@ -56,4 +55,11 @@ onMounted(async () => {
     loading.value = false
   }
 })
+*/
+
+import { useAnimeStore } from '@/stores/animeStore'
+import { storeToRefs } from 'pinia'
+
+const animeStore = useAnimeStore()
+const { animes, isLoading, error } = storeToRefs(animeStore)
 </script>
