@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // import.meta.env.VITE_API_URL → lit la variable VITE_API_URL depuis le fichier .env
 // || 'https://api.jikan.moe/v4/anime?q=bleach&sfw' → valeur par défaut si la variable n'existe pas
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.jikan.moe/v4/anime?q=bleach&sfw'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.jikan.moe/v4'
 
 
 // axios.create() crée une instance Axios avec une configuration réutilisable

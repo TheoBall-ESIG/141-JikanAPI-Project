@@ -66,14 +66,7 @@
 
 <script setup>
 
-import {computed, onMounted, ref} from "vue";
-import {useRoute} from "vue-router";
 
-//const route = useRoute()
-
-//const animes = ref([])
-const loading = ref(false);
-const error = ref(null);
 /**
 const anime = computed(() => {
   return animes.value.find(p => p.mal_id === Number(route.params.id))
@@ -99,6 +92,8 @@ onMounted(async () => {
  */
 
 import { useAnimeStore } from '@/stores/animeStore'
+import {useRoute} from "vue-router";
+import {computed} from "vue";
 
 const route = useRoute()
 const animeStore = useAnimeStore()
