@@ -3,13 +3,24 @@
     <h1 class="text-h4 my-4">Liste anime</h1>
 
     <!-- Chargement (skeleton) -->
-    <v-row v-if="isLoading">
+    <v-row v-if="animeStore.isLoading">
       <v-col v-for="n in 8" :key="n" cols="12" sm="6" md="4" lg="3">
         <v-skeleton-loader type="image, heading, text" />
       </v-col>
     </v-row>
 
     <!-- Erreur -->
+    <v-alert
+        v-else-if="animeStore.animes.length === 0"
+        type="error"
+        variant="tonal"
+        class="mb-6"
+    >
+      Impossible de charger les Animes. Vérifiez que l'API tourne sur
+      {{ apiUrl }}.
+    </v-alert>
+
+
     <v-alert v-else-if="error" type="error" class="my-4">
       {{ error }}
     </v-alert>
@@ -62,4 +73,5 @@ import { storeToRefs } from 'pinia'
 
 const animeStore = useAnimeStore()
 const { animes, isLoading, error } = storeToRefs(animeStore)
+const apiUrl = import.meta.env.VITE_API_URL
 </script>
