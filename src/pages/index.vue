@@ -2,6 +2,20 @@
   <v-container>
     <h1 class="text-h4 my-4">Liste anime</h1>
 
+    <v-row class="mb-4">
+      <v-col cols="12" sm="6" md="4">
+        <v-text-field
+            v-model="searchQuery"
+            label="Rechercher un Anime"
+            prepend-inner-icon="mdi-magnify"
+            clearable
+            hide-details
+            variant="outlined"
+            density="compact"
+        />
+      </v-col>
+    </v-row>
+
     <!-- Chargement (skeleton) -->
     <v-row v-if="animeStore.isLoading">
       <v-col v-for="n in 8" :key="n" cols="12" sm="6" md="4" lg="3">
@@ -25,10 +39,19 @@
       {{ error }}
     </v-alert>
 
+    <v-alert
+        v-else-if="filteredBySearch.length === 0"
+        type="info"
+        variant="tonal"
+        class="mb-6"
+    >
+      Aucun anime ne correspond à votre recherche.
+    </v-alert>
+
     <!-- TODO : Liste des animes -->
     <v-row v-else>
       <v-col
-          v-for="anime in animes"
+          v-for="anime in filteredBySearch"
           :key="anime.mal_id"
           cols="12" sm="6" md="4" lg="3"
       >
@@ -39,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import {ref, onMounted, computed} from 'vue'
 import AnimeCard from "@/components/AnimeCard.vue";
 
 // État réactif
@@ -70,6 +93,18 @@ onMounted(async () => {
 
 import { useAnimeStore } from '@/stores/animeStore'
 import { storeToRefs } from 'pinia'
+
+const searchQuery = ref('')
+const filteredBySearch = computed(() => {
+  if (!searchQuery.value) return animeStore.animes
+
+  const query = searchQuery.value.toLowerCase()
+
+  return animeStore.animes.filter(anime =>
+      anime.title.toLowerCase().includes(query),
+  )
+})
+
 
 const animeStore = useAnimeStore()
 const { animes, isLoading, error } = storeToRefs(animeStore)
