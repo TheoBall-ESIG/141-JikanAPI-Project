@@ -14,6 +14,7 @@ export const useAnimeStore = defineStore('anime', {
     state: () => ({
         // Liste de tous les Anime chargés depuis l'API
         animes: [],
+        favorites: [],
         // Liste des types de Pokémon (Feu, Eau, Plante, etc.)
         // types: [],
         // Indicateur de chargement — true pendant les appels API
@@ -47,6 +48,24 @@ export const useAnimeStore = defineStore('anime', {
                 return state.animes.find(anime => anime.mal_id === Number(animeId))
             }
         },
+
+        totalFavorites: state => {
+            return state.favorites.length
+        },
+
+        isFavorite: state => {
+            return anime => {
+                return state.favorites.includes(anime.mal_id)
+            }
+        },
+
+        getFavorites: state => {
+            const favoriteAnimes = state.favorites.map(favoriteId => {
+                return state.animes.find(anime => anime.mal_id === favoriteId)
+            })
+            return favoriteAnimes.filter(anime => anime !== undefined)
+        },
+
     },
 
     /**
@@ -69,6 +88,7 @@ export const useAnimeStore = defineStore('anime', {
                     this.fetchAnimes({ withLoader: false }),
                     //this.fetchTypes(),
                 ])
+                this.loadFavorites()
 
                 console.log('Store Anime initialisé')
             } catch (error) {
@@ -91,13 +111,67 @@ export const useAnimeStore = defineStore('anime', {
             try {
                 const response = await api.get('/anime?q=bleach&sfw')
 
-                const json = await response.data
-                this.animes = json.data
+                this.animes = response.data.data
+                this.cleanupFavorites()
             } catch (error) {
                 console.error('Erreur lors du chargement des Animes:', error.message)
                 this.animes = []
             } finally {
                 if (withLoader) this.isLoading = false
+            }
+        },
+
+        loadFavorites() {
+            try {
+                const savedFavorites = localStorage.getItem('anime_favorites')
+                if (savedFavorites) {
+                    this.favorites = JSON.parse(savedFavorites)
+                    console.log('Favoris chargés :', this.favorites.length, 'éléments')
+                } else {
+                    this.favorites = []
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des favoris :', error)
+                this.favorites = []
+            }
+        },
+
+        saveFavorites() {
+            try {
+                localStorage.setItem('anime_favorites', JSON.stringify(this.favorites))
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde des favoris :', error)
+            }
+        },
+
+        toggleFavorite(anime) {
+            const favoriteIndex = this.favorites.findIndex(
+                favoriteId => favoriteId === anime.mal_id,
+            )
+
+            if (favoriteIndex === -1) {
+                // Pas encore favori → on l'ajoute
+                this.favorites.push(anime.mal_id)
+            } else {
+                // Déjà favori → on le retire
+                this.favorites.splice(favoriteIndex, 1)
+            }
+
+            // Sauvegarder après chaque changement
+            this.saveFavorites()
+        },
+
+        cleanupFavorites() {
+            const initialCount = this.favorites.length
+
+            this.favorites = this.favorites.filter(favoriteId => {
+                return this.animes.some(anime => anime.mal_id === favoriteId)
+            })
+
+            const removedCount = initialCount - this.favorites.length
+            if (removedCount > 0) {
+                console.log('Nettoyage :', removedCount, 'favoris obsolètes supprimés')
+                this.saveFavorites()
             }
         },
 
