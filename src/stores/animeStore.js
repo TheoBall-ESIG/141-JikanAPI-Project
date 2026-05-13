@@ -21,6 +21,12 @@ export const useAnimeStore = defineStore('anime', {
         isLoading: false,
         // Message d'erreur en cas de problème
         error: null,
+        searchQuery: '',
+        selectedRanges: [],
+        selectedEpisodeRanges: [],
+        lastSort: 'title',
+        titleSortOrder: 'asc',
+        scoreSortOrder: 'desc',
     }),
 
     /**
@@ -107,9 +113,9 @@ export const useAnimeStore = defineStore('anime', {
         async fetchAnimes({ withLoader = true } = {}) {
             if (withLoader) this.isLoading = true
 
-
             try {
-                const response = await api.get('/anime?q=bleach&sfw')
+                const randomPage = Math.floor(Math.random() * 100) + 1
+                const response = await api.get(`/anime?page=${randomPage}&sfw`)
 
                 this.animes = response.data.data
                 this.cleanupFavorites()

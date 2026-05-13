@@ -53,7 +53,6 @@
         />
       </v-col>
 
-      <!-- Tri alphabétique -->
       <v-col cols="12" class="d-flex">
         <v-btn
             class="mr-3"
@@ -68,6 +67,7 @@
         </v-btn>
 
         <v-btn
+            class="mr-3"
             :variant="lastSort === 'title' ? 'flat' : 'outlined'"
             :color="lastSort === 'title' ? 'primary' : undefined"
             :prepend-icon="titleSortOrder === 'asc'
@@ -76,6 +76,15 @@
             @click="toggleTitleSort"
         >
           Titre {{ titleSortOrder === 'asc' ? 'A → Z' : 'Z → A' }}
+        </v-btn>
+
+        <v-btn
+            variant="outlined"
+            prepend-icon="mdi-shuffle"
+            :loading="animeStore.isLoading"
+            @click="animeStore.fetchAnimes()"
+        >
+          Reroll
         </v-btn>
       </v-col>
     </v-row>
@@ -127,11 +136,38 @@ import { useAnimeStore } from '@/stores/animeStore'
 
 const animeStore = useAnimeStore()
 
-// — Recherche & filtres —
-const searchQuery = ref('')
-const selectedRanges = ref([])
-const selectedEpisodeRanges = ref([])
+// — Recherche & filtres — liés au store pour persister entre les pages
+const searchQuery = computed({
+  get: () => animeStore.searchQuery,
+  set: (val) => { animeStore.searchQuery = val }
+})
 
+const selectedRanges = computed({
+  get: () => animeStore.selectedRanges,
+  set: (val) => { animeStore.selectedRanges = val }
+})
+
+const selectedEpisodeRanges = computed({
+  get: () => animeStore.selectedEpisodeRanges,
+  set: (val) => { animeStore.selectedEpisodeRanges = val }
+})
+
+const lastSort = computed({
+  get: () => animeStore.lastSort,
+  set: (val) => { animeStore.lastSort = val }
+})
+
+const titleSortOrder = computed({
+  get: () => animeStore.titleSortOrder,
+  set: (val) => { animeStore.titleSortOrder = val }
+})
+
+const scoreSortOrder = computed({
+  get: () => animeStore.scoreSortOrder,
+  set: (val) => { animeStore.scoreSortOrder = val }
+})
+
+// — Ces données restent locales, pas besoin de les persister —
 const scoreRanges = [
   { id: 'excellent', label: 'Excellent (8+)', min: 8,  max: 10 },
   { id: 'bon',       label: 'Bon (6–8)',       min: 6,  max: 8  },
@@ -155,25 +191,20 @@ function closeMenus() {
 }
 
 // — Tri —
-// lastSort mémorise quel bouton a été cliqué en dernier
-const lastSort = ref('title')        // 'title' | 'score'
-const titleSortOrder = ref('asc')    // 'asc'   | 'desc'
-const scoreSortOrder = ref('desc')   // 'desc'  | 'asc'
-
 function toggleTitleSort() {
-  titleSortOrder.value = titleSortOrder.value === 'asc' ? 'desc' : 'asc'
-  lastSort.value = 'title'
+  animeStore.titleSortOrder = animeStore.titleSortOrder === 'asc' ? 'desc' : 'asc'
+  animeStore.lastSort = 'title'
 }
 
 function toggleScoreSort() {
-  scoreSortOrder.value = scoreSortOrder.value === 'desc' ? 'asc' : 'desc'
-  lastSort.value = 'score'
+  animeStore.scoreSortOrder = animeStore.scoreSortOrder === 'desc' ? 'asc' : 'desc'
+  animeStore.lastSort = 'score'
 }
 
 // — Pipeline de filtres —
 const filteredByScore = computed(() => {
-  if (!selectedRanges.value.length) return animeStore.animes
-  const ranges = scoreRanges.filter(r => selectedRanges.value.includes(r.id))
+  if (!animeStore.selectedRanges.length) return animeStore.animes
+  const ranges = scoreRanges.filter(r => animeStore.selectedRanges.includes(r.id))
   return animeStore.animes.filter(anime =>
       anime.score !== null &&
       ranges.some(range => anime.score >= range.min && anime.score < range.max)
@@ -181,8 +212,8 @@ const filteredByScore = computed(() => {
 })
 
 const filteredByEpisodes = computed(() => {
-  if (!selectedEpisodeRanges.value.length) return filteredByScore.value
-  const ranges = episodeRanges.filter(r => selectedEpisodeRanges.value.includes(r.id))
+  if (!animeStore.selectedEpisodeRanges.length) return filteredByScore.value
+  const ranges = episodeRanges.filter(r => animeStore.selectedEpisodeRanges.includes(r.id))
   return filteredByScore.value.filter(anime =>
       anime.episodes !== null &&
       ranges.some(range => anime.episodes >= range.min && anime.episodes <= range.max)
@@ -190,8 +221,8 @@ const filteredByEpisodes = computed(() => {
 })
 
 const filteredBySearch = computed(() => {
-  if (!searchQuery.value) return filteredByEpisodes.value
-  const query = searchQuery.value.toLowerCase()
+  if (!animeStore.searchQuery) return filteredByEpisodes.value
+  const query = animeStore.searchQuery.toLowerCase()
   return filteredByEpisodes.value.filter(anime =>
       anime.title.toLowerCase().includes(query)
   )
@@ -199,17 +230,16 @@ const filteredBySearch = computed(() => {
 
 const sortedAnimes = computed(() => {
   return [...filteredBySearch.value].sort((a, b) => {
-    if (lastSort.value === 'score') {
-      // Les animes sans score vont à la fin
+    if (animeStore.lastSort === 'score') {
       if (a.score === null && b.score === null) return 0
       if (a.score === null) return 1
       if (b.score === null) return -1
-      return scoreSortOrder.value === 'desc'
+      return animeStore.scoreSortOrder === 'desc'
           ? b.score - a.score
           : a.score - b.score
     } else {
       const comparison = a.title.localeCompare(b.title, 'fr')
-      return titleSortOrder.value === 'asc' ? comparison : -comparison
+      return animeStore.titleSortOrder === 'asc' ? comparison : -comparison
     }
   })
 })
