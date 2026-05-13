@@ -13,6 +13,7 @@
             hide-details
             variant="outlined"
             density="compact"
+            @focus="closeMenus"
         />
       </v-col>
 
@@ -20,6 +21,7 @@
       <v-col cols="12" sm="6" md="4">
         <v-select
             v-model="selectedRanges"
+            v-model:menu="scoreMenuOpen"
             :items="scoreRanges"
             item-title="label"
             item-value="id"
@@ -37,6 +39,7 @@
       <v-col cols="12" sm="6" md="4">
         <v-select
             v-model="selectedEpisodeRanges"
+            v-model:menu="episodeMenuOpen"
             :items="episodeRanges"
             item-title="label"
             item-value="id"
@@ -142,6 +145,14 @@ const episodeRanges = [
   { id: 'long',      label: 'Long   (27–50)',  min: 27,  max: 50  },
   { id: 'treslong',  label: 'Très long (51+)', min: 51,  max: Infinity },
 ]
+
+const scoreMenuOpen = ref(false)
+const episodeMenuOpen = ref(false)
+
+function closeMenus() {
+  scoreMenuOpen.value = false
+  episodeMenuOpen.value = false
+}
 
 // — Tri —
 // lastSort mémorise quel bouton a été cliqué en dernier
