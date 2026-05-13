@@ -51,7 +51,12 @@ export const useAnimeStore = defineStore('anime', {
          */
         getAnimeById: (state) => {
             return (animeId) => {
-                return state.animes.find(anime => anime.mal_id === Number(animeId))
+                // Cherche d'abord dans les animes chargés
+                const fromAnimes = state.animes.find(anime => anime.mal_id === Number(animeId))
+                if (fromAnimes) return fromAnimes
+
+                // Sinon cherche dans les favoris (objets complets stockés)
+                return state.favorites.find(anime => anime.mal_id === Number(animeId))
             }
         },
 
@@ -60,17 +65,10 @@ export const useAnimeStore = defineStore('anime', {
         },
 
         isFavorite: state => {
-            return anime => {
-                return state.favorites.includes(anime.mal_id)
-            }
+            return anime => state.favorites.some(f => f.mal_id === anime.mal_id)
         },
 
-        getFavorites: state => {
-            const favoriteAnimes = state.favorites.map(favoriteId => {
-                return state.animes.find(anime => anime.mal_id === favoriteId)
-            })
-            return favoriteAnimes.filter(anime => anime !== undefined)
-        },
+        getFavorites: state => state.favorites,
 
     },
 
@@ -82,20 +80,11 @@ export const useAnimeStore = defineStore('anime', {
     actions: {
 
         async init() {
-            console.log('Initialisation du store Anime...')
-
+            this.loadFavorites()
             this.isLoading = true
             this.error = null
-
             try {
-                // Promise.all exécute les deux requêtes en parallèle
-                // Plus rapide que de les faire l'une après l'autre
-                await Promise.all([
-                    this.fetchAnimes({ withLoader: false }),
-                    //this.fetchTypes(),
-                ])
-                this.loadFavorites()
-
+                await Promise.all([ this.fetchAnimes({ withLoader: false }) ])
                 console.log('Store Anime initialisé')
             } catch (error) {
                 this.error = 'Erreur lors du chargement des données'
@@ -118,12 +107,27 @@ export const useAnimeStore = defineStore('anime', {
                 const response = await api.get(`/anime?page=${randomPage}&sfw`)
 
                 this.animes = response.data.data
-                this.cleanupFavorites()
+                //this.cleanupFavorites()
             } catch (error) {
                 console.error('Erreur lors du chargement des Animes:', error.message)
                 this.animes = []
             } finally {
                 if (withLoader) this.isLoading = false
+            }
+        },
+
+        async searchAnimes(query) {
+            this.isLoading = true
+            try {
+                const url = query
+                    ? `/anime?q=${encodeURIComponent(query)}&sfw`
+                    : `/anime?page=${Math.floor(Math.random() * 100) + 1}&sfw`
+                const response = await api.get(url)
+                this.animes = response.data.data
+            } catch (error) {
+                console.error('Erreur recherche:', error.message)
+            } finally {
+                this.isLoading = false
             }
         },
 
@@ -151,22 +155,15 @@ export const useAnimeStore = defineStore('anime', {
         },
 
         toggleFavorite(anime) {
-            const favoriteIndex = this.favorites.findIndex(
-                favoriteId => favoriteId === anime.mal_id,
-            )
-
-            if (favoriteIndex === -1) {
-                // Pas encore favori → on l'ajoute
-                this.favorites.push(anime.mal_id)
+            const index = this.favorites.findIndex(f => f.mal_id === anime.mal_id)
+            if (index === -1) {
+                this.favorites.push(anime)
             } else {
-                // Déjà favori → on le retire
-                this.favorites.splice(favoriteIndex, 1)
+                this.favorites.splice(index, 1)
             }
-
-            // Sauvegarder après chaque changement
             this.saveFavorites()
         },
-
+/**
         cleanupFavorites() {
             const initialCount = this.favorites.length
 
@@ -180,6 +177,7 @@ export const useAnimeStore = defineStore('anime', {
                 this.saveFavorites()
             }
         },
+        */
 
 
         /**

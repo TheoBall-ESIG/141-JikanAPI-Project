@@ -130,16 +130,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import AnimeCard from "@/components/AnimeCard.vue"
 import { useAnimeStore } from '@/stores/animeStore'
 
 const animeStore = useAnimeStore()
 
 // — Recherche & filtres — liés au store pour persister entre les pages
-const searchQuery = computed({
-  get: () => animeStore.searchQuery,
-  set: (val) => { animeStore.searchQuery = val }
+const searchQuery = ref(animeStore.searchQuery)
+
+let debounceTimer = null
+watch(searchQuery, (val) => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    animeStore.searchQuery = val
+    animeStore.searchAnimes(val)
+  }, 500)
 })
 
 const selectedRanges = computed({
@@ -219,7 +225,8 @@ const filteredByEpisodes = computed(() => {
       ranges.some(range => anime.episodes >= range.min && anime.episodes <= range.max)
   )
 })
-
+const filteredBySearch = computed(() => filteredByEpisodes.value)
+/**
 const filteredBySearch = computed(() => {
   if (!animeStore.searchQuery) return filteredByEpisodes.value
   const query = animeStore.searchQuery.toLowerCase()
@@ -227,6 +234,7 @@ const filteredBySearch = computed(() => {
       anime.title.toLowerCase().includes(query)
   )
 })
+*/
 
 const sortedAnimes = computed(() => {
   return [...filteredBySearch.value].sort((a, b) => {
