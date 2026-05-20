@@ -11,8 +11,7 @@
     <v-card v-else max-width="1000" class="mx-auto">
       <v-row no-gutters>
 
-        <!-- IMAGE -->
-        <!-- Paysage : pleine largeur -->
+        <!-- IMAGE paysage -->
         <v-col v-if="isLandscape" cols="12">
           <v-img
               :src="anime.images.webp.large_image_url"
@@ -22,7 +21,7 @@
           />
         </v-col>
 
-        <!-- Portrait : demi-largeur sur sm+, pleine largeur sur mobile -->
+        <!-- IMAGE portrait -->
         <v-col v-else cols="12" sm="5">
           <v-img
               :src="anime.images.webp.large_image_url"
@@ -33,42 +32,131 @@
         </v-col>
 
         <!-- INFOS -->
-        <!-- S'adapte selon le layout -->
         <v-col :cols="isLandscape ? 12 : undefined" :sm="isLandscape ? 12 : 7">
-          <div class="d-flex align-center px-4 py-2">
-            <v-card-title class="text-h5 text-wrap pa-0 flex-grow-1">
-              {{ anime.title }}
-            </v-card-title>
+
+          <!-- Titre + favori -->
+          <div class="d-flex align-center px-4 pt-4 pb-2">
+            <div class="flex-grow-1">
+              <h1 class="text-h5 font-weight-bold text-wrap">{{ anime.title }}</h1>
+              <div v-if="anime.title_english && anime.title_english !== anime.title"
+                   class="text-caption text-medium-emphasis mt-1">
+                {{ anime.title_english }}
+              </div>
+              <div v-if="anime.title_japanese" class="text-caption text-medium-emphasis">
+                {{ anime.title_japanese }}
+              </div>
+            </div>
             <v-btn
                 :icon="animeStore.isFavorite(anime) ? 'mdi-heart' : 'mdi-heart-outline'"
-                :color="animeStore.isFavorite(anime) ? 'red' : ''"
+                :color="animeStore.isFavorite(anime) ? 'secondary' : ''"
                 variant="text"
                 @click="animeStore.toggleFavorite(anime)"
             />
           </div>
-          <v-card-subtitle style="white-space: normal; opacity: 1" class="pb-1">
-            Titre japonais : {{ anime.title_japanese }}
-          </v-card-subtitle>
-          <v-card-subtitle style="white-space: normal; opacity: 1" class="pb-1">
-            Titre anglais : {{ anime.title_english }}
-          </v-card-subtitle>
-          <v-card-subtitle style="white-space: normal; opacity: 1" class="pb-1">
-            Score : {{ anime.score }}
-          </v-card-subtitle>
-          <v-card-subtitle style="white-space: normal; opacity: 1" class="pb-1">
-            Episodes : {{ anime.episodes }}
-          </v-card-subtitle>
-          <v-card-subtitle style="white-space: normal; opacity: 1" class="pb-1">
-            Statut : {{ anime.status }}
-          </v-card-subtitle>
+
+          <!-- Badges type + statut + rating -->
+          <div class="d-flex flex-wrap gap-2 px-4 pb-3">
+            <v-chip v-if="anime.type" size="small" color="primary">
+              {{ anime.type }}
+            </v-chip>
+            <v-chip v-if="anime.status" size="small" :color="statusColor">
+              {{ anime.status }}
+            </v-chip>
+            <v-chip v-if="anime.rating" size="small" variant="outlined">
+              {{ anime.rating }}
+            </v-chip>
+            <v-chip v-if="anime.source" size="small" variant="outlined">
+              {{ anime.source }}
+            </v-chip>
+          </div>
+
+          <v-divider class="mx-4 mb-3" />
+
+          <!-- Stats en grille -->
+          <v-row class="px-4 pb-2" dense>
+            <v-col cols="6">
+              <div class="text-caption text-medium-emphasis">Score MAL</div>
+              <div class="d-flex align-center">
+                <v-icon size="16" color="secondary" class="mr-1">mdi-star</v-icon>
+                <span class="font-weight-bold">{{ anime.score ?? '—' }}</span>
+                <span v-if="anime.scored_by" class="text-caption text-medium-emphasis ml-1">
+                  ({{ formatNumber(anime.scored_by) }})
+                </span>
+              </div>
+            </v-col>
+
+            <v-col cols="6">
+              <div class="text-caption text-medium-emphasis">Classement</div>
+              <div class="font-weight-bold">#{{ anime.rank ?? '—' }}</div>
+            </v-col>
+
+            <v-col cols="6">
+              <div class="text-caption text-medium-emphasis">Épisodes</div>
+              <div class="font-weight-bold">{{ anime.episodes ?? '—' }}</div>
+            </v-col>
+
+            <v-col cols="6">
+              <div class="text-caption text-medium-emphasis">Durée / épisode</div>
+              <div class="font-weight-bold">{{ anime.duration ?? '—' }}</div>
+            </v-col>
+
+            <v-col cols="6">
+              <div class="text-caption text-medium-emphasis">Diffusion</div>
+              <div class="font-weight-bold">{{ anime.aired?.string ?? '—' }}</div>
+            </v-col>
+
+            <v-col cols="6">
+              <div class="text-caption text-medium-emphasis">Popularité</div>
+              <div class="font-weight-bold">#{{ anime.popularity ?? '—' }}</div>
+            </v-col>
+          </v-row>
+
+          <v-divider class="mx-4 my-2" />
+
+          <!-- Genres -->
+          <div v-if="anime.genres?.length" class="px-4 pb-2">
+            <div class="text-caption text-medium-emphasis mb-1">Genres</div>
+            <div class="d-flex flex-wrap gap-1">
+              <v-chip
+                  v-for="genre in anime.genres"
+                  :key="genre.mal_id"
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+              >
+                {{ genre.name }}
+              </v-chip>
+            </div>
+          </div>
+
+          <!-- Studios -->
+          <div v-if="anime.studios?.length" class="px-4 pb-3">
+            <div class="text-caption text-medium-emphasis mb-1">Studios</div>
+            <div class="d-flex flex-wrap gap-1">
+              <v-chip
+                  v-for="studio in anime.studios"
+                  :key="studio.mal_id"
+                  size="small"
+                  color="surface-variant"
+              >
+                {{ studio.name }}
+              </v-chip>
+            </div>
+          </div>
+
         </v-col>
 
-        <!-- SYNOPSIS : toujours pleine largeur -->
+        <!-- SYNOPSIS -->
         <v-col cols="12">
+          <v-divider />
           <v-card-text>
-            <p v-if="anime.synopsis" class="text-body-1">
+            <div class="text-caption text-medium-emphasis text-uppercase mb-2 font-weight-bold">
+              Synopsis
+            </div>
+            <p v-if="anime.synopsis" class="text-body-2" style="line-height: 1.7">
               {{ anime.synopsis }}
             </p>
+            <p v-else class="text-medium-emphasis">Aucun synopsis disponible.</p>
           </v-card-text>
         </v-col>
 
@@ -87,10 +175,7 @@ const animeStore = useAnimeStore()
 
 const anime = computed(() => animeStore.getAnimeById(route.params.id))
 
-// true si l'image est trop large pour le layout deux colonnes
 const isLandscape = ref(false)
-
-// On vérifie le ratio dès que l'anime est disponible
 watch(anime, (val) => {
   if (!val) return
   const img = new Image()
@@ -99,4 +184,20 @@ watch(anime, (val) => {
   }
   img.src = val.images.webp.large_image_url
 }, { immediate: true })
+
+// Couleur du chip statut selon l'état de diffusion
+const statusColor = computed(() => {
+  switch (anime.value?.status) {
+    case 'Currently Airing': return 'success'
+    case 'Finished Airing':  return 'default'
+    case 'Not yet aired':    return 'warning'
+    default:                 return 'default'
+  }
+})
+
+// Formate un grand nombre : 123456 → 123k
+function formatNumber(n) {
+  if (!n) return '—'
+  return n >= 1000 ? `${Math.round(n / 1000)}k` : n
+}
 </script>

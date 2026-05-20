@@ -4,7 +4,18 @@
 
     <v-row class="mb-4">
       <!-- Recherche texte -->
-      <v-col cols="12">
+      <v-col cols="12" sm="6" md="4">
+        <v-text-field
+            class="mb-3"
+            v-model="searchQuery"
+            label="Rechercher un Anime"
+            prepend-inner-icon="mdi-magnify"
+            clearable
+            hide-details
+            variant="outlined"
+            density="compact"
+            @focus="closeMenus"
+        />
         <!-- Score + Titre sur une ligne -->
         <div class="d-flex mb-2">
           <v-btn
