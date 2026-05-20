@@ -168,12 +168,19 @@
 <script setup>
 import { useAnimeStore } from '@/stores/animeStore'
 import { useRoute } from 'vue-router'
-import { computed, ref, watch } from 'vue'
+import {computed, ref, watch, watchEffect} from 'vue'
 
 const route = useRoute()
 const animeStore = useAnimeStore()
 
 const anime = computed(() => animeStore.getAnimeById(route.params.id))
+
+// Si l'anime n'est pas en mémoire (ex: après refresh), on le charge directement
+watchEffect(async () => {
+  if (!anime.value) {
+    await animeStore.fetchAnimeById(route.params.id)
+  }
+})
 
 const isLandscape = ref(false)
 watch(anime, (val) => {

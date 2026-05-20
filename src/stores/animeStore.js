@@ -116,6 +116,21 @@ export const useAnimeStore = defineStore('anime', {
             }
         },
 
+        async fetchAnimeById(id) {
+            try {
+                const response = await api.get(`/anime/${id}`)
+                const anime = response.data.data
+                // On l'ajoute dans la liste si pas déjà présent
+                if (!this.animes.find(a => a.mal_id === anime.mal_id)) {
+                    this.animes.push(anime)
+                }
+                return anime
+            } catch (error) {
+                console.error('Erreur chargement anime:', error.message)
+                return null
+            }
+        },
+
         async searchAnimes(query) {
             this.isLoading = true
             try {
