@@ -35,9 +35,17 @@
         <!-- INFOS -->
         <!-- S'adapte selon le layout -->
         <v-col :cols="isLandscape ? 12 : undefined" :sm="isLandscape ? 12 : 7">
-          <v-card-title class="text-h5 text-wrap py-4">
-            {{ anime.title }}
-          </v-card-title>
+          <div class="d-flex align-center px-4 py-2">
+            <v-card-title class="text-h5 text-wrap pa-0 flex-grow-1">
+              {{ anime.title }}
+            </v-card-title>
+            <v-btn
+                :icon="animeStore.isFavorite(anime) ? 'mdi-heart' : 'mdi-heart-outline'"
+                :color="animeStore.isFavorite(anime) ? 'red' : ''"
+                variant="text"
+                @click="animeStore.toggleFavorite(anime)"
+            />
+          </div>
           <v-card-subtitle style="white-space: normal; opacity: 1" class="pb-1">
             Titre japonais : {{ anime.title_japanese }}
           </v-card-subtitle>

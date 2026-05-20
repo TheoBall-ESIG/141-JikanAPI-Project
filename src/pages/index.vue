@@ -4,80 +4,34 @@
 
     <v-row class="mb-4">
       <!-- Recherche texte -->
-      <v-col cols="12" sm="6" md="4">
-        <v-text-field
-            v-model="searchQuery"
-            label="Rechercher un Anime"
-            prepend-inner-icon="mdi-magnify"
-            clearable
-            hide-details
-            variant="outlined"
-            density="compact"
-            @focus="closeMenus"
-        />
-      </v-col>
+      <v-col cols="12">
+        <!-- Score + Titre sur une ligne -->
+        <div class="d-flex mb-2">
+          <v-btn
+              class="mr-3"
+              :variant="lastSort === 'score' ? 'flat' : 'outlined'"
+              :color="lastSort === 'score' ? 'primary' : undefined"
+              :prepend-icon="scoreSortOrder === 'desc'
+          ? 'mdi-sort-numeric-descending'
+          : 'mdi-sort-numeric-ascending'"
+              @click="toggleScoreSort"
+          >
+            Score {{ scoreSortOrder === 'desc' ? '9 → 0' : '0 → 9' }}
+          </v-btn>
 
-      <!-- Filtre score -->
-      <v-col cols="12" sm="6" md="4">
-        <v-select
-            v-model="selectedRanges"
-            v-model:menu="scoreMenuOpen"
-            :items="scoreRanges"
-            item-title="label"
-            item-value="id"
-            label="Filtrer par score"
-            prepend-inner-icon="mdi-star"
-            multiple
-            clearable
-            hide-details
-            variant="outlined"
-            density="compact"
-        />
-      </v-col>
+          <v-btn
+              :variant="lastSort === 'title' ? 'flat' : 'outlined'"
+              :color="lastSort === 'title' ? 'primary' : undefined"
+              :prepend-icon="titleSortOrder === 'asc'
+          ? 'mdi-sort-alphabetical-ascending'
+          : 'mdi-sort-alphabetical-descending'"
+              @click="toggleTitleSort"
+          >
+            Titre {{ titleSortOrder === 'asc' ? 'A → Z' : 'Z → A' }}
+          </v-btn>
+        </div>
 
-      <!-- Filtre épisodes -->
-      <v-col cols="12" sm="6" md="4">
-        <v-select
-            v-model="selectedEpisodeRanges"
-            v-model:menu="episodeMenuOpen"
-            :items="episodeRanges"
-            item-title="label"
-            item-value="id"
-            label="Filtrer par épisodes"
-            prepend-inner-icon="mdi-television-play"
-            multiple
-            clearable
-            hide-details
-            variant="outlined"
-            density="compact"
-        />
-      </v-col>
-
-      <v-col cols="12" class="d-flex">
-        <v-btn
-            class="mr-3"
-            :variant="lastSort === 'score' ? 'flat' : 'outlined'"
-            :color="lastSort === 'score' ? 'primary' : undefined"
-            :prepend-icon="scoreSortOrder === 'desc'
-        ? 'mdi-sort-numeric-descending'
-        : 'mdi-sort-numeric-ascending'"
-            @click="toggleScoreSort"
-        >
-          Score {{ scoreSortOrder === 'desc' ? '9 → 0' : '0 → 9' }}
-        </v-btn>
-
-        <v-btn
-            class="mr-3"
-            :variant="lastSort === 'title' ? 'flat' : 'outlined'"
-            :color="lastSort === 'title' ? 'primary' : undefined"
-            :prepend-icon="titleSortOrder === 'asc'
-        ? 'mdi-sort-alphabetical-ascending'
-        : 'mdi-sort-alphabetical-descending'"
-            @click="toggleTitleSort"
-        >
-          Titre {{ titleSortOrder === 'asc' ? 'A → Z' : 'Z → A' }}
-        </v-btn>
-
+        <!-- Reroll en dessous -->
         <v-btn
             variant="outlined"
             prepend-icon="mdi-shuffle"
@@ -92,7 +46,16 @@
     <!-- Chargement -->
     <v-row v-if="animeStore.isLoading">
       <v-col v-for="n in 8" :key="n" cols="12" sm="6" md="4" lg="3">
-        <v-skeleton-loader type="image, heading, text" />
+        <v-card>
+          <!-- Image -->
+          <v-skeleton-loader type="image" height="320" />
+          <!-- Titre -->
+          <v-skeleton-loader type="heading" class="px-4 pt-3 pb-1" />
+          <!-- Année + épisodes -->
+          <v-skeleton-loader type="text" class="px-4 pb-1" />
+          <!-- Genres + favori -->
+          <v-skeleton-loader type="text" class="px-4 pb-3" />
+        </v-card>
       </v-col>
     </v-row>
 
@@ -225,7 +188,14 @@ const filteredByEpisodes = computed(() => {
       ranges.some(range => anime.episodes >= range.min && anime.episodes <= range.max)
   )
 })
-const filteredBySearch = computed(() => filteredByEpisodes.value)
+const filteredBySearch = computed(() => {
+  if (!animeStore.searchQuery) return filteredByEpisodes.value
+  const query = animeStore.searchQuery.toLowerCase()
+  return filteredByEpisodes.value.filter(anime =>
+      anime.title.toLowerCase().includes(query) ||
+      (anime.title_english && anime.title_english.toLowerCase().includes(query))
+  )
+})
 /**
 const filteredBySearch = computed(() => {
   if (!animeStore.searchQuery) return filteredByEpisodes.value
