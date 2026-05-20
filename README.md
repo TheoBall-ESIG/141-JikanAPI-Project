@@ -29,8 +29,8 @@ La branche [`solution`](https://github.com/fallinov/esig-141-demo-vuetify-api/tr
 ## Installation
 
 ```bash
-git clone https://github.com/fallinov/esig-141-demo-vuetify-api.git
-cd esig-141-demo-vuetify-api
+git clone https://github.com/TheoBall-ESIG/141-JikanAPI-Project.git
+cd 141-JikanAPI-Project
 npm install
 npm run dev
 ```
@@ -42,28 +42,42 @@ L'application s'ouvre sur [http://localhost:3000](http://localhost:3000).
 ```
 public/
 ├── favicon.ico          # Favicon multi-tailles (16, 32, 48px)
-└── favicon.png          # Favicon PNG (silhouettes Rick & Morty)
+└── favicon.png          # Favicon PNG (tête de Gojo Satoru)
 src/
-├── App.vue              # Layout (app-bar + footer)
-├── main.js              # Point d'entrée
+├── assets/
+│   └── gojoicon.png     # Icone de tête de Gojo Satoru 
+├── components/
+│   ├── AnimeCard.vue    # Card d'anime dans la liste d'accueil
+│   ├── AppFooter.vue    # Pied de page
+│   └── AppHeader.vue    # En-tête
 ├── pages/
-│   ├── index.vue        # TODO : Liste des personnages (route /)
-│   └── about.vue        # TODO : Page statique (route /about)
+│   ├── anime/
+│   │   └── [id].vue         # Page de détail d'un anime
+│   ├── a-propos.vue     # Card d'anime dans la liste d'accueil
+│   ├── favoris.vue      # Footer
+│   └── index.vue        # Header
 ├── plugins/
-│   ├── index.js         # Enregistrement des plugins
-│   └── vuetify.js       # Configuration Vuetify (dark theme)
-├── router/
-│   └── index.js         # Routes auto-générées (unplugin-vue-router)
-└── stores/
-    └── index.js         # Pinia store
+│   ├── axios.js         # Card d'anime dans la liste d'accueil
+│   ├── index.js         # Footer
+│   └── vuetify.js       # Header
+├── routeur/
+│   └── index.js         # Header
+├── stores/
+│   ├── animeStore.js    # Card d'anime dans la liste d'accueil
+│   └── index.js         # Header
+├── styles/
+│   └── settings.scss    # Card d'anime dans la liste d'accueil
+├── App.vue              #
+└── main.js              #
+
 ```
 
-## API Rick and Morty
+## API Jikan
 
-- **URL** : [`https://rickandmortyapi.com/api/character`](https://rickandmortyapi.com/api/character)
-- **Documentation** : [rickandmortyapi.com/documentation](https://rickandmortyapi.com/documentation)
-- **Réponse** : `{ info: {...}, results: [...] }`
-- **Champs utiles** : `id`, `name`, `status`, `species`, `image`
+- **URL** : [`https://api.jikan.moe/v4`](https://api.jikan.moe/v4)
+- **Documentation** : [https://docs.api.jikan.moe/](https://docs.api.jikan.moe/)
+- **Réponse** : `{ data: [...], pagination: { has_next_page, items, ... } }`
+- **Champs utiles** : `mal_id`, `title`, `title_english`, `title_japanese`, `images`, `score`, `scored_by`, `rank`, `popularity`, `episodes`, `duration`, `status`, `aired`, `type`, `source`, `rating`, `genres`, `studios`, `synopsis`, `year`
 
 ## Stack
 
@@ -71,3 +85,7 @@ src/
 - [Vuetify 3](https://vuetifyjs.com/) — Composants Material Design
 - [Vue Router 4](https://router.vuejs.org/) + unplugin-vue-router (routage automatique)
 - [Vite](https://vitejs.dev/) — Build tool
+
+## Utilisation IA
+
+Version gratuite de Claude pour aide à la résolution de problèmes et certaines fonctionnalités "avancées"
