@@ -172,12 +172,16 @@ function closeMenus() {
 
 // — Tri —
 function toggleTitleSort() {
-  animeStore.titleSortOrder = animeStore.titleSortOrder === 'asc' ? 'desc' : 'asc'
+  if (animeStore.lastSort === 'title') {
+    animeStore.titleSortOrder = animeStore.titleSortOrder === 'asc' ? 'desc' : 'asc'
+  }
   animeStore.lastSort = 'title'
 }
 
 function toggleScoreSort() {
-  animeStore.scoreSortOrder = animeStore.scoreSortOrder === 'desc' ? 'asc' : 'desc'
+  if (animeStore.lastSort === 'score') {
+    animeStore.scoreSortOrder = animeStore.scoreSortOrder === 'desc' ? 'asc' : 'desc'
+  }
   animeStore.lastSort = 'score'
 }
 
