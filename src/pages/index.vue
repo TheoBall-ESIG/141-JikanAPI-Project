@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <div class="d-flex align-center my-4">
+    <div class="d-flex align-baseline my-4">
       <h1 class="text-h4 mr-3">Liste anime</h1>
       <span class="text-body-2 text-medium-emphasis">
         ({{ animeStore.animes.length }} animes aléatoires)
@@ -22,7 +22,7 @@
             @focus="closeMenus"
         />
         <!-- Tris par score/titre -->
-        <div class="d-flex mb-2">
+        <div class="d-flex mb-3">
           <v-btn
               class="mr-3"
               :variant="lastSort === 'score' ? 'flat' : 'outlined'"
