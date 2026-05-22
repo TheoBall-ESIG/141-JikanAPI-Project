@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import {onMounted} from "vue";
 import api from "@/plugins/axios.js";
 
 /**
@@ -7,20 +6,13 @@ import api from "@/plugins/axios.js";
  * Centralise les appels API et partage les données entre les pages.
  */
 export const useAnimeStore = defineStore('anime', {
-    /**
-     * State — les données brutes du store.
-     * Retourne une fonction qui retourne un objet (comme data() dans Options API).
-     */
+
     state: () => ({
-        // Liste de tous les Anime chargés depuis l'API
         animes: [],
         favorites: [],
-        // Liste des types de Pokémon (Feu, Eau, Plante, etc.)
-        // types: [],
-        // Indicateur de chargement — true pendant les appels API
         isLoading: false,
-        // Message d'erreur en cas de problème
         error: null,
+        // Etat des filtres et tris (stockés ici pour la persistance)
         searchQuery: '',
         selectedRanges: [],
         selectedEpisodeRanges: [],
@@ -46,7 +38,7 @@ export const useAnimeStore = defineStore('anime', {
         /**
          * Trouve un Anime par son identifiant.
          * Retourne une fonction (getter avec paramètre).
-         * @param {Object} state - Le state du store
+         * @param {Object} state Le state du store
          * @returns {function(string): Object|undefined}
          */
         getAnimeById: (state) => {
@@ -64,10 +56,12 @@ export const useAnimeStore = defineStore('anime', {
             return state.favorites.length
         },
 
+        // Indique si l'anime est favoris
         isFavorite: state => {
             return anime => state.favorites.some(f => f.mal_id === anime.mal_id)
         },
 
+        // Liste des favoris
         getFavorites: state => state.favorites,
 
     },
@@ -79,6 +73,11 @@ export const useAnimeStore = defineStore('anime', {
      */
     actions: {
 
+        /**
+         * Initialise le store au démarrage de l'application.
+         * Charge les favoris depuis le localStorage puis les animes depuis l'API.
+         * Appelé une seule fois dans App.vue.
+         */
         async init() {
             this.loadFavorites()
             this.isLoading = true
@@ -96,14 +95,15 @@ export const useAnimeStore = defineStore('anime', {
 
 
         /**
-         * Charge tous les Animes depuis l'API.
-         * Note : ne gère pas isLoading — c'est init() qui s'en charge. /anime?q=bleach&sfw
+         * Charge 25 animes aléatoires depuis l'API (page aléatoire).
+         * @param {boolean} withLoader Gère isLoading si true
+         * @returns {Promise<void>}
          */
         async fetchAnimes({ withLoader = true } = {}) {
             if (withLoader) this.isLoading = true
 
             try {
-                const randomPage = Math.floor(Math.random() * 100) + 1
+                const randomPage = Math.floor(Math.random() * 1000) + 1
                 const response = await api.get(`/anime?page=${randomPage}&sfw`)
 
                 this.animes = response.data.data
@@ -116,6 +116,11 @@ export const useAnimeStore = defineStore('anime', {
             }
         },
 
+        /**
+         * Charge un anime spécifique par son ID MyAnimeList (site sur lequel est basé l'API)
+         * @param id identifiant MyAnimeList utilisé comme id pour l'API également
+         * @returns {Promise<*|null>}
+         */
         async fetchAnimeById(id) {
             try {
                 const response = await api.get(`/anime/${id}`)
@@ -131,6 +136,11 @@ export const useAnimeStore = defineStore('anime', {
             }
         },
 
+        /**
+         * Recherche des animes par titre via l'API
+         * @param query terme de recherche
+         * @returns {Promise<void>}
+         */
         async searchAnimes(query) {
             this.isLoading = true
             try {
@@ -146,6 +156,9 @@ export const useAnimeStore = defineStore('anime', {
             }
         },
 
+        /**
+         * Charge les favoris depuis le localStorage
+         */
         loadFavorites() {
             try {
                 const savedFavorites = localStorage.getItem('anime_favorites')
@@ -161,6 +174,9 @@ export const useAnimeStore = defineStore('anime', {
             }
         },
 
+        /**
+         * Enregistre les favoris dans le localStorage
+         */
         saveFavorites() {
             try {
                 localStorage.setItem('anime_favorites', JSON.stringify(this.favorites))
@@ -169,6 +185,10 @@ export const useAnimeStore = defineStore('anime', {
             }
         },
 
+        /**
+         * Ajoute ou retire un anime des favoris puis sauvegarde les favoris
+         * @param anime
+         */
         toggleFavorite(anime) {
             const index = this.favorites.findIndex(f => f.mal_id === anime.mal_id)
             if (index === -1) {
@@ -178,42 +198,5 @@ export const useAnimeStore = defineStore('anime', {
             }
             this.saveFavorites()
         },
-/**
-        cleanupFavorites() {
-            const initialCount = this.favorites.length
-
-            this.favorites = this.favorites.filter(favoriteId => {
-                return this.animes.some(anime => anime.mal_id === favoriteId)
-            })
-
-            const removedCount = initialCount - this.favorites.length
-            if (removedCount > 0) {
-                console.log('Nettoyage :', removedCount, 'favoris obsolètes supprimés')
-                this.saveFavorites()
-            }
-        },
-        */
-
-
-        /**
-         * Charge tous les types de Pokémon depuis l'API.
-         * Note : ne gère pas isLoading — c'est init() qui s'en charge.
-         */
-/**         async fetchTypes() {
-            const response = await fetch('http://localhost:3535/types')
-
-            if (!response.ok) {
-                throw new Error(`Erreur HTTP : ${response.status}`)
-            }
-
-            this.types = await response.json()
-            console.log('Types chargés :', this.types.length)
-        },
-*/
-        /**
-         * Initialise le store : charge les Animes et les types en parallèle.
-         * À appeler une seule fois au démarrage de l'application (dans App.vue).
-         */
-
     },
 })

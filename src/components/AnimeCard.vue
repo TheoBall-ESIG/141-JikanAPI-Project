@@ -9,7 +9,6 @@
           cover
       />
 
-      <!-- Badge type — fond sombre pour lisibilité -->
       <v-chip
           v-if="anime.type"
           size="small"
@@ -18,7 +17,6 @@
         {{ anime.type }}
       </v-chip>
 
-      <!-- Badge score — fond sombre pour lisibilité -->
       <v-chip
           v-if="anime.score"
           size="small"
@@ -34,7 +32,6 @@
     </v-card-title>
 
     <v-card-text class="pt-1 pb-2">
-      <!-- Année + épisodes -->
       <div class="d-flex align-center mb-2 text-caption text-medium-emphasis">
         <v-icon size="14" class="mr-1">mdi-calendar</v-icon>
         {{ anime.year ?? '—' }}
@@ -43,7 +40,6 @@
         {{ anime.episodes ? `${anime.episodes} ép.` : '—' }}
       </div>
 
-      <!-- Genres + favori sur la même ligne -->
       <div class="d-flex align-center justify-space-between">
         <div class="d-flex flex-wrap gap-1">
           <v-chip
@@ -57,7 +53,6 @@
           </v-chip>
         </div>
 
-        <!-- Bouton favori aligné avec les genres -->
         <v-btn
             :icon="animeStore.isFavorite(anime) ? 'mdi-heart' : 'mdi-heart-outline'"
             :color="animeStore.isFavorite(anime) ? 'secondary' : ''"
@@ -93,6 +88,7 @@ function handleToggleFavorite() {
   animeStore.toggleFavorite(anime)
   snackbarMessage.value = wasFavorite ? 'Retiré des favoris' : 'Ajouté aux favoris'
   showSnackbar.value = true
+  // Déclenche l'animation puis retire la classe pour pouvoir la rejouer au prochain clic
   isAnimating.value = true
   setTimeout(() => { isAnimating.value = false }, 600)
 }

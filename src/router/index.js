@@ -9,7 +9,7 @@ const router = createRouter({
     if (savedPosition) {
       return savedPosition
     }
-    // Sinon (navigation normale), remonte en haut
+    // Sinon (navigation normale), on remonte en haut
     return { top: 0 }
   }
 })

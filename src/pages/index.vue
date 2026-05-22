@@ -3,7 +3,7 @@
     <h1 class="text-h4 my-4">Liste anime</h1>
 
     <v-row class="mb-4">
-      <!-- Recherche texte -->
+      <!-- Champ de recherche -->
       <v-col cols="12" sm="6" md="4">
         <v-text-field
             class="mb-3"
@@ -16,7 +16,7 @@
             density="compact"
             @focus="closeMenus"
         />
-        <!-- Score + Titre sur une ligne -->
+        <!-- Tris par score/titre -->
         <div class="d-flex mb-2">
           <v-btn
               class="mr-3"
@@ -42,7 +42,7 @@
           </v-btn>
         </div>
 
-        <!-- Reroll en dessous -->
+        <!-- Reroll des 25 animes -->
         <v-btn
             variant="outlined"
             prepend-icon="mdi-shuffle"
@@ -70,7 +70,7 @@
       </v-col>
     </v-row>
 
-    <!-- Erreur chargement -->
+    <!-- Si erreur de chargement -->
     <v-alert
         v-else-if="animeStore.animes.length === 0"
         type="error"
@@ -80,7 +80,7 @@
       Impossible de charger les Animes.
     </v-alert>
 
-    <!-- Aucun résultat -->
+    <!-- Si aucun résultat -->
     <v-alert
         v-else-if="sortedAnimes.length === 0"
         type="info"
@@ -110,9 +110,13 @@ import { useAnimeStore } from '@/stores/animeStore'
 
 const animeStore = useAnimeStore()
 
-// — Recherche & filtres — liés au store pour persister entre les pages
+// Initialisé depuis store pour reprendre la valeur si retour sur la page
 const searchQuery = ref(animeStore.searchQuery)
 
+/**
+ * Attend 500ms après la dernière entrée avant d'appeler l'API pour ne pas dépasser les limites de l'API
+ * @type {null}
+ */
 let debounceTimer = null
 watch(searchQuery, (val) => {
   clearTimeout(debounceTimer)
@@ -122,6 +126,7 @@ watch(searchQuery, (val) => {
   }, 500)
 })
 
+// Computed en lecture écriture pour synchroniser avec le store
 const selectedRanges = computed({
   get: () => animeStore.selectedRanges,
   set: (val) => { animeStore.selectedRanges = val }
@@ -147,7 +152,7 @@ const scoreSortOrder = computed({
   set: (val) => { animeStore.scoreSortOrder = val }
 })
 
-// — Ces données restent locales, pas besoin de les persister —
+// Données statiques de référence
 const scoreRanges = [
   { id: 'excellent', label: 'Excellent (8+)', min: 8,  max: 10 },
   { id: 'bon',       label: 'Bon (6–8)',       min: 6,  max: 8  },
@@ -165,12 +170,18 @@ const episodeRanges = [
 const scoreMenuOpen = ref(false)
 const episodeMenuOpen = ref(false)
 
+/**
+ * Ferme les menus de filtres sur mobile pour éviter des conflits de focus
+ */
 function closeMenus() {
   scoreMenuOpen.value = false
   episodeMenuOpen.value = false
 }
 
-// — Tri —
+
+/**
+ * Tris (le premier active le tri, les suivants alternent l'ordre)
+ */
 function toggleTitleSort() {
   if (animeStore.lastSort === 'title') {
     animeStore.titleSortOrder = animeStore.titleSortOrder === 'asc' ? 'desc' : 'asc'
@@ -185,7 +196,10 @@ function toggleScoreSort() {
   animeStore.lastSort = 'score'
 }
 
-// — Pipeline de filtres —
+/**
+ * Filtres par score, épisodes puis recherche
+ * @type {ComputedRef<[]|never[]>}
+ */
 const filteredByScore = computed(() => {
   if (!animeStore.selectedRanges.length) return animeStore.animes
   const ranges = scoreRanges.filter(r => animeStore.selectedRanges.includes(r.id))
@@ -203,6 +217,11 @@ const filteredByEpisodes = computed(() => {
       ranges.some(range => anime.episodes >= range.min && anime.episodes <= range.max)
   )
 })
+
+/**
+ * Recherche les animes par titre japonais et (s'il existe) anglais
+ * @type {ComputedRef<[]|never[]|T[]>}
+ */
 const filteredBySearch = computed(() => {
   if (!animeStore.searchQuery) return filteredByEpisodes.value
   const query = animeStore.searchQuery.toLowerCase()
@@ -211,16 +230,11 @@ const filteredBySearch = computed(() => {
       (anime.title_english && anime.title_english.toLowerCase().includes(query))
   )
 })
-/**
-const filteredBySearch = computed(() => {
-  if (!animeStore.searchQuery) return filteredByEpisodes.value
-  const query = animeStore.searchQuery.toLowerCase()
-  return filteredByEpisodes.value.filter(anime =>
-      anime.title.toLowerCase().includes(query)
-  )
-})
-*/
 
+/**
+ * Filtre et tri les animes grâce aux filtres et tris précédents
+ * @type {ComputedRef<*[]>}
+ */
 const sortedAnimes = computed(() => {
   return [...filteredBySearch.value].sort((a, b) => {
     if (animeStore.lastSort === 'score') {

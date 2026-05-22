@@ -175,13 +175,14 @@ const animeStore = useAnimeStore()
 
 const anime = computed(() => animeStore.getAnimeById(route.params.id))
 
-// Si l'anime n'est pas en mémoire (ex: après refresh), on le charge directement
+// Si l'anime n'est pas en mémoire dans le store (ex: après refresh), on le charge directement
 watchEffect(async () => {
   if (!anime.value) {
     await animeStore.fetchAnimeById(route.params.id)
   }
 })
 
+// Détecte si l'image est en portrait ou paysage pour adapter l'affichage
 const isLandscape = ref(false)
 watch(anime, (val) => {
   if (!val) return
@@ -202,7 +203,11 @@ const statusColor = computed(() => {
   }
 })
 
-// Formate un grand nombre : 123456 → 123k
+/**
+ * Formate les grands nombres : 123456 → 123k
+ * @param n nombre reçu en paramètre
+ * @returns {string|*}
+ */
 function formatNumber(n) {
   if (!n) return '—'
   return n >= 1000 ? `${Math.round(n / 1000)}k` : n

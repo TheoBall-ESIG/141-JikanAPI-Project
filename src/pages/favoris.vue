@@ -4,7 +4,6 @@
       Mes favoris ({{ animeStore.totalFavorites }})
     </h1>
 
-    <!-- Message si aucun favori -->
     <v-alert
         v-if="animeStore.totalFavorites === 0"
         type="info"
@@ -15,7 +14,6 @@
       Cliquez sur le coeur d'un anime pour l'ajouter !
     </v-alert>
 
-    <!-- Grille de cartes Pokémon favoris -->
     <v-row v-else>
       <v-col
           v-for="anime in animeStore.getFavorites"

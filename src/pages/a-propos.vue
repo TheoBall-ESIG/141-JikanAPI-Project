@@ -63,7 +63,6 @@
           </v-card-text>
         </v-card>
 
-        <!-- Contexte scolaire + API -->
         <v-card>
           <v-card-text>
             <div class="d-flex align-center mb-3">
