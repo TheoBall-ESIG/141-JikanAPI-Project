@@ -1,6 +1,11 @@
 <template>
   <v-container>
-    <h1 class="text-h4 my-4">Liste anime</h1>
+    <div class="d-flex align-center my-4">
+      <h1 class="text-h4 mr-3">Liste anime</h1>
+      <span class="text-body-2 text-medium-emphasis">
+        ({{ animeStore.animes.length }} animes aléatoires)
+      </span>
+    </div>
 
     <v-row class="mb-4">
       <!-- Champ de recherche -->
