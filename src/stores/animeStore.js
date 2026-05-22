@@ -84,7 +84,6 @@ export const useAnimeStore = defineStore('anime', {
             this.error = null
             try {
                 await Promise.all([ this.fetchAnimes({ withLoader: false }) ])
-                console.log('Store Anime initialisé')
             } catch (error) {
                 this.error = 'Erreur lors du chargement des données'
                 console.error(error)
@@ -107,7 +106,6 @@ export const useAnimeStore = defineStore('anime', {
                 const response = await api.get(`/anime?page=${randomPage}&sfw`)
 
                 this.animes = response.data.data
-                //this.cleanupFavorites()
             } catch (error) {
                 console.error('Erreur lors du chargement des Animes:', error.message)
                 this.animes = []
@@ -164,7 +162,6 @@ export const useAnimeStore = defineStore('anime', {
                 const savedFavorites = localStorage.getItem('anime_favorites')
                 if (savedFavorites) {
                     this.favorites = JSON.parse(savedFavorites)
-                    console.log('Favoris chargés :', this.favorites.length, 'éléments')
                 } else {
                     this.favorites = []
                 }
